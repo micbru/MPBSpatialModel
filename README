@@ -1,5 +1,5 @@
-The code here is used for simulations of the spatial model descrived in "Mountain pine beetle spread in forests with varying host resistance" by Micah Brush and Mark A. Lewis.
+The code here is used for simulations of the spatial model described in "Mountain pine beetle spread in forests with varying host resistance" by Micah Brush and Mark A. Lewis.
 
-The .ipynb files are where the simulations are done and where the figures are generated. Most python notebooks (.ipynb files) use the collection of functions stored in spatialfunctions.py, which give all necessary functions for the simulation.
+The .ipynb files are where the simulations are done and where the figures are generated. Most python notebooks (.ipynb files) use the collection of functions stored in spatialfunctions.py, which give all necessary functions for the simulation. Note that the animations have a jupyter notebook and a python file as they may not work depending on your installation of notebooks.
 
 The figures and animations are stored in their respective folders. Note that some figures generated here were not included in the final manuscript.
