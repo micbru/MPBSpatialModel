@@ -21,10 +21,11 @@ def dffull(m,k,p):
     return - t1**k*t2**p/(k+m)/beta(k,p+1)
 
 # Get the optimized function for every k
-def getfopt(p,c,kmin=1e-2,kmax=1e2,returnk=False):
+def getfopt(p,c,kmin=1e-2,kmax=1e2,returnk=False,mfix=0):
     '''
     This function returns an interpolated function that optimizes the beetle aggregation for each mean value of beetles by minimizing the survival function F. This works on a log range for small m, but then linear for larger m. We set a minimum and maximum for the aggregation k, so for very small number of beetles we set k=kmin, ie. we do not let the beetles aggregate infinitely, and for large numbers of beetles we set k=kmax. Outside of the interpolation range we set F=1 (for small m) and F=0 (for large m).
     If returnk = True, also return the k values themselves and the m values they were calculated at
+    Additionally, mfix allows kmin to be stopped at a specified value of m rather than an arbitrary set value of k. If 0, this does nothing. If >0, mfix is the value of m where we stop minimizing k in order to ignore the behavior when there is a small number of beetles.
     '''
     # Get the optimized k
     # Generate a list of k values for logspaced m between 0 and c
@@ -43,9 +44,16 @@ def getfopt(p,c,kmin=1e-2,kmax=1e2,returnk=False):
         kl[i] = sol.x
     # Take exponent to get true ks
     kl = np.exp(kl)
-    # Now fix the beginning so that kl is the minimum until it isn't
+
+    # Now if we do not have a fixed kmin, but instead vary it to be the value when m=mfix, then set all values of kl to that value
+    if mfix!=0:
+        # Now set it up so we see when m=mfix and set that as the k_min
+        fix_ind = np.argwhere(mrange>=mfix)[0,0]
+        # Set all initial values to that value
+        kl[0:fix_ind].fill(kl[fix_ind])
+    # Else fix the beginning so that kl is the minimum until it isn't
     # Only do this if kl[0] is not kmin
-    if np.abs(kl[0]-kmin)>0.1:
+    elif np.abs(kl[0]-kmin)>0.1:
         # Find the first time it isn't kmax and set up to there as kmin
         first_index = np.argmax(np.abs(kl-kmax)>0.1)
         kl[0:first_index].fill(kmin)
@@ -161,7 +169,7 @@ def iterate(xr,niter,f,x0,al,c,s,N,dx=1,**kwargs):
 # METRICS
 ############################
 # Get all metrics from a single parameter set
-def get_outbreak_metrics(p,c,s,N,al,xr,xrexp,dx,niter,kmin=1e-2,kmax=1e2):
+def get_outbreak_metrics(p,c,s,N,al,xr,xrexp,dx,niter,kmin=1e-2,kmax=1e2,mfix=0):
     '''
     This function takes in a single set of parameters and then returns three metrics for the outbreak:
     1. The speed of the wave.
@@ -173,7 +181,7 @@ def get_outbreak_metrics(p,c,s,N,al,xr,xrexp,dx,niter,kmin=1e-2,kmax=1e2):
     is above some cutoff at some point in time.
     '''
     # Before doing anything, we have to derive the optimum F function for these parameters
-    fopt = getfopt(p,c,kmin=kmin,kmax=kmax)
+    fopt = getfopt(p,c,kmin=kmin,kmax=kmax,mfix=mfix)
     # Set size, speed, and period to 0, and only update if needed
     speed, period, size = 0,0,0
     # First, check to make sure 1-F = m/c exists. 
